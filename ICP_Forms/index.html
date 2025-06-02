@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <head>
+    <title>ICP Forms</title>
+  </head>
+  <body>
+    <h1>Formulario
+    <input type="text" id="name" placeholder="Nombre" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="text" id="specialty" placeholder="Specialty" />
+    <input type="number" id="phone" placeholder="Phone" />
+    <input type="text" id="workstation" placeholder="Workstation" />
+    <textarea id="message" placeholder="Mensaje"></textarea>
+    <button id="submit">Enviar</button>
+  
+  <script type="module">
+    import { AuthClient } from "https://cdn.jsdelivr.net/npm/@dfinity/auth-client@latest/dist/index.min.js";
+    import { HttpAgent, Actor } from "https://cdn.jsdelivr.net/npm/@dfinity/agent@latest/dist/index.min.js";
+    import { idlFactory as backend_idl, canisterId as backend_id } from "declarations/backend";
+
+    let actor = null;
+
+    async function init () {
+      const authClient = await AuthClient.create();
+
+        if (!await authClient.isAuthenticated()) {
+          await authClient.login({
+            identityProvider: "https://identity.ic0.app",
+              onSuccess: async () => {
+                creatorActor(authClient);
+              },
+            });
+        } else {
+          createActor(authClient);
+        }
+      }
+
+      async function createActor(authClient) {
+        const identity = authClient.getIdentity();
+        const agent = new HttpAgent({ identity });
+
+        actor = Actor.createActor(backend_idl, {
+          agent,
+          canisterId: backend_id,
+        });
+
+        console.log("Actor creado", actor);
+      }
+
+      document.getElementById("submit").addEventListener("click", async () => {
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const specialty = document.getElementById("specialty").value;
+        const phone = document.getElementById("phone").value;
+        const workstation = document.getElementById("workstation").value;
+        const message = document.getElementById("message").value;
+
+        if (!actor) {
+          altert("Primero inicia sesión.");
+          return;
+        }
+
+        const res = await actor.submitFrom(name, email, message);
+        alert(res);
+      });
+
+      init();
+    </script>
+  </body>
+</html>

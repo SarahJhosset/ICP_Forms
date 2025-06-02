@@ -1,0 +1,36 @@
+import HashMap "mo:base/HashMap";
+import Principal "mo:base/Principal";
+
+actor {
+
+  type Form = {
+    name : Text;
+    email : Text;
+    specialty : Text;
+    phone : Text;
+    workstation : Text;
+    message : Text;
+  };
+
+  let forms = HashMap.HashMap<Principal, Form>(10, Principal.equal, Principal.hash);
+
+  public func submitForm(name : Text, email : Text, specialty : Text, phone : Text, workstation : Text, message : Text) : async Text {
+    let user = Principal.fromActor;
+    let Form = {
+      name = name;
+      email = email;
+      specialty = specialty;
+      phone = phone;
+      workstation = workstation;
+      message = message;
+
+    };
+    let _method = user;
+    return "Formulario recibido"
+  };
+
+  public query func getForm(principal : Principal) : async ?Form {
+    return forms.get(principal)
+  };
+
+}
